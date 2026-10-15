@@ -1,0 +1,23 @@
+{
+  "name": "devtask-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {"node": ">=20.19.0"},
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "assets:gif": "node scripts/create-workflow-gif.js"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "6.1.2",
+    "bootstrap": "5.3.8",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "vite": "8.3.4"
+  },
+  "devDependencies": {
+    "gifenc": "1.0.3"
+  }
+}

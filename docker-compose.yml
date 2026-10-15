@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: devtask-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-devtask}
+      POSTGRES_USER: ${POSTGRES_USER:-devtask}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Définissez POSTGRES_PASSWORD dans .env}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-devtask} -d ${POSTGRES_DB:-devtask}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: devtask-backend
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-devtask}
+      DB_USERNAME: ${POSTGRES_USER:-devtask}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-devtask_password}
+      JWT_SECRET: ${JWT_SECRET:?Set a random JWT_SECRET (at least 32 characters) in .env}
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/v3/api-docs || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: devtask-frontend
+    ports:
+      - "127.0.0.1:5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
